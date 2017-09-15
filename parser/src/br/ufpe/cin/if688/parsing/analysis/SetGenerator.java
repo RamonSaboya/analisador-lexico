@@ -119,59 +119,49 @@ public final class SetGenerator {
 		startFollow.add(SpecialSymbol.EOF);
 
 		Map<Nonterminal, Set<GeneralSymbol>> copy = null;
-		
-		boolean equals = true;
-		
+
 		Set<GeneralSymbol> trailer = new HashSet<GeneralSymbol>();
-		while(equals) {
+		while (!follow.equals(copy)) {
 			copy = new HashMap<Nonterminal, Set<GeneralSymbol>>();
-			for(Entry<Nonterminal, Set<GeneralSymbol>> entry : follow.entrySet()) {
-				Set<GeneralSymbol> symbolsSet = new HashSet<GeneralSymbol>();
-				for(GeneralSymbol setSymbol : entry.getValue()) {
-					symbolsSet.add(setSymbol);
-				}
-				copy.put(entry.getKey(), symbolsSet);
+			for (Entry<Nonterminal, Set<GeneralSymbol>> entry : follow.entrySet()) {
+				copy.put(entry.getKey(), new HashSet<GeneralSymbol>(entry.getValue()));
 			}
-			
-			for(Production production : g.getProductions()) {
+
+			for (Production production : g.getProductions()) {
 				Nonterminal nonterminal = production.getNonterminal();
-				
+
 				Set<GeneralSymbol> nonterminalFollow = follow.get(nonterminal);
-				
+
+				Set<GeneralSymbol> symbolFirst;
+				Set<GeneralSymbol> symbolFollow;
+
+				trailer = new HashSet<GeneralSymbol>();
 				trailer.addAll(nonterminalFollow);
-				
+
 				List<GeneralSymbol> symbols = production.getProduction();
-				for(int c = symbols.size() - 1; c >= 0; c--) {
+				for (int c = symbols.size() - 1; c >= 0; c--) {
 					GeneralSymbol symbol = symbols.get(c);
-					
-					if(symbol instanceof Nonterminal) {
-						nonterminalFollow.addAll(trailer);
-						
-						if(nonterminalFollow.contains(SpecialSymbol.EPSILON)) {
-							if(trailer.contains(SpecialSymbol.EPSILON)) {
-								trailer.addAll(nonterminalFollow);
+
+					symbolFirst = first.get(symbol);
+					symbolFollow = follow.get(symbol);
+
+					if (symbol instanceof Nonterminal) {
+						symbolFollow.addAll(trailer);
+
+						if (symbolFirst.contains(SpecialSymbol.EPSILON)) {
+							if (trailer.contains(SpecialSymbol.EPSILON)) {
+								trailer.addAll(symbolFirst);
 							} else {
-								trailer.addAll(nonterminalFollow);
+								trailer.addAll(symbolFirst);
 								trailer.remove(SpecialSymbol.EPSILON);
 							}
 						} else {
-							trailer.clear();
-							trailer.addAll(nonterminalFollow);
+							trailer = new HashSet<GeneralSymbol>();
+							trailer.addAll(symbolFirst);
 						}
 					} else {
-						trailer.addAll(nonterminalFollow);
-					}
-				}
-			}
-
-			for(Entry<Nonterminal, Set<GeneralSymbol>> entry : follow.entrySet()) {
-				if(!copy.containsKey(entry.getKey())) {
-					equals = false;
-				} else {
-					for(GeneralSymbol setSymbol : entry.getValue()) {
-						if(!copy.get(entry.getKey()).contains(setSymbol)) {
-							equals = false;
-						}
+						trailer = new HashSet<GeneralSymbol>();
+						trailer.add(symbol);
 					}
 				}
 			}

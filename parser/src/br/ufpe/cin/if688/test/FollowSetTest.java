@@ -20,7 +20,7 @@ import junit.framework.TestCase;
 public class FollowSetTest extends TestCase {
 	
 	public static void main(String[] args) {
-		new FollowSetTest().testFirstSetG3();
+		new FollowSetTest().testFollowSetG3();
 	}
 
 	public void testFollowSetG1() {
@@ -149,7 +149,7 @@ public class FollowSetTest extends TestCase {
 		assertEquals(follow, expected);
 	}
 	
-	public void testFirstSetG3() {
+	public void testFollowSetG3() {
 		/*
 		 * Gramatica de exemplo
 		 * E -> TA
@@ -259,7 +259,7 @@ public class FollowSetTest extends TestCase {
 		assertEquals(follow, expected);
 	}
 	
-	public void testFirstSetG4() {
+	public void testFollowSetG4() {
         /*
          * Gramatica de exemplo
          * S -> aAb
