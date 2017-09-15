@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import br.ufpe.cin.if688.parsing.grammar.Grammar;
@@ -16,7 +17,13 @@ public final class SetGenerator {
 
 	private static Map<Nonterminal, Set<GeneralSymbol>> finalFirstSet;
 
-	private static Map<Nonterminal, List<Production>> getNonterminalToProductions(Grammar g) {
+	public static Map<Nonterminal, Set<GeneralSymbol>> getFirst(Grammar g) {
+		if (g == null) {
+			throw new NullPointerException("g nao pode ser nula.");
+		}
+
+		Map<Nonterminal, Set<GeneralSymbol>> first = initializeNonterminalMapping(g);
+
 		Map<Nonterminal, List<Production>> nonterminalToProductions = new HashMap<Nonterminal, List<Production>>();
 
 		for (Production production : g.getProductions()) {
@@ -31,18 +38,6 @@ public final class SetGenerator {
 			productions.add(production);
 		}
 
-		return nonterminalToProductions;
-	}
-
-	public static Map<Nonterminal, Set<GeneralSymbol>> getFirst(Grammar g) {
-		if (g == null) {
-			throw new NullPointerException("g nao pode ser nula.");
-		}
-
-		Map<Nonterminal, Set<GeneralSymbol>> first = initializeNonterminalMapping(g);
-
-		Map<Nonterminal, List<Production>> nonterminalToProductions = getNonterminalToProductions(g);
-
 		finalFirstSet = new HashMap<Nonterminal, Set<GeneralSymbol>>();
 
 		for (Nonterminal nonterminal : g.getNonterminals()) {
@@ -54,7 +49,8 @@ public final class SetGenerator {
 		return first;
 	}
 
-	private static Set<GeneralSymbol> getFirstSet(Nonterminal nonterminal, Map<Nonterminal, List<Production>> nonterminalToProductions) {
+	private static Set<GeneralSymbol> getFirstSet(Nonterminal nonterminal,
+			Map<Nonterminal, List<Production>> nonterminalToProductions) {
 		Set<GeneralSymbol> first = new HashSet<GeneralSymbol>();
 
 		List<Production> productions = nonterminalToProductions.get(nonterminal);
@@ -110,71 +106,78 @@ public final class SetGenerator {
 		return first;
 	}
 
-	public static Map<Nonterminal, Set<GeneralSymbol>> getFollow(Grammar g, Map<Nonterminal, Set<GeneralSymbol>> first) {
+	public static Map<Nonterminal, Set<GeneralSymbol>> getFollow(Grammar g,
+			Map<Nonterminal, Set<GeneralSymbol>> first) {
 		if (g == null || first == null) {
 			throw new NullPointerException();
 		}
 
 		Map<Nonterminal, Set<GeneralSymbol>> follow = initializeNonterminalMapping(g);
 
-		Map<Nonterminal, List<Production>> nonterminalToProductions = getNonterminalToProductions(g);
-
 		Nonterminal startSymbol = g.getStartSymbol();
-
 		Set<GeneralSymbol> startFollow = follow.get(startSymbol);
 		startFollow.add(SpecialSymbol.EOF);
 
-		getFollowSet(startSymbol, follow, nonterminalToProductions, first);
-
-		return follow;
-	}
-
-	private static void getFollowSet(Nonterminal nonterminal, Map<Nonterminal, Set<GeneralSymbol>> follow,
-			Map<Nonterminal, List<Production>> nonterminalToProductions, Map<Nonterminal, Set<GeneralSymbol>> first) {
-		List<Production> productions = nonterminalToProductions.get(nonterminal);
-
-		for (Production production : productions) {
-			List<GeneralSymbol> productionSymbols = production.getProduction();
-
-			int size = productionSymbols.size();
-
-			GeneralSymbol last = null;
-
-			for (int c = size - 1; c >= 0; c--) {
-				GeneralSymbol generalSymbol = productionSymbols.get(c);
-
-				if (generalSymbol instanceof Terminal) {
-					last = generalSymbol;
-				} else if (generalSymbol instanceof Nonterminal) {
-					Set<GeneralSymbol> symbolFollow = follow.get(generalSymbol);
-
-					if (last == null) {
-						symbolFollow.addAll(follow.get(nonterminal));
-					} else if (last instanceof Terminal) {
-						symbolFollow.add(last);
-					} else if (last instanceof Nonterminal) {
-						Set<GeneralSymbol> lastFirst = first.get(last);
-
-						if (lastFirst.contains(SpecialSymbol.EPSILON)) {
-							symbolFollow.addAll(follow.get(nonterminal));
-						} else {
-							if (symbolFollow.contains(SpecialSymbol.EPSILON)) {
-								symbolFollow.addAll(lastFirst);
+		Map<Nonterminal, Set<GeneralSymbol>> copy = null;
+		
+		boolean equals = true;
+		
+		Set<GeneralSymbol> trailer = new HashSet<GeneralSymbol>();
+		while(equals) {
+			copy = new HashMap<Nonterminal, Set<GeneralSymbol>>();
+			for(Entry<Nonterminal, Set<GeneralSymbol>> entry : follow.entrySet()) {
+				Set<GeneralSymbol> symbolsSet = new HashSet<GeneralSymbol>();
+				for(GeneralSymbol setSymbol : entry.getValue()) {
+					symbolsSet.add(setSymbol);
+				}
+				copy.put(entry.getKey(), symbolsSet);
+			}
+			
+			for(Production production : g.getProductions()) {
+				Nonterminal nonterminal = production.getNonterminal();
+				
+				Set<GeneralSymbol> nonterminalFollow = follow.get(nonterminal);
+				
+				trailer.addAll(nonterminalFollow);
+				
+				List<GeneralSymbol> symbols = production.getProduction();
+				for(int c = symbols.size() - 1; c >= 0; c--) {
+					GeneralSymbol symbol = symbols.get(c);
+					
+					if(symbol instanceof Nonterminal) {
+						nonterminalFollow.addAll(trailer);
+						
+						if(nonterminalFollow.contains(SpecialSymbol.EPSILON)) {
+							if(trailer.contains(SpecialSymbol.EPSILON)) {
+								trailer.addAll(nonterminalFollow);
 							} else {
-								symbolFollow.addAll(lastFirst);
-								symbolFollow.remove(SpecialSymbol.EPSILON);
+								trailer.addAll(nonterminalFollow);
+								trailer.remove(SpecialSymbol.EPSILON);
 							}
+						} else {
+							trailer.clear();
+							trailer.addAll(nonterminalFollow);
+						}
+					} else {
+						trailer.addAll(nonterminalFollow);
+					}
+				}
+			}
+
+			for(Entry<Nonterminal, Set<GeneralSymbol>> entry : follow.entrySet()) {
+				if(!copy.containsKey(entry.getKey())) {
+					equals = false;
+				} else {
+					for(GeneralSymbol setSymbol : entry.getValue()) {
+						if(!copy.get(entry.getKey()).contains(setSymbol)) {
+							equals = false;
 						}
 					}
-
-					if (generalSymbol != nonterminal) {
-						getFollowSet((Nonterminal) generalSymbol, follow, nonterminalToProductions, first);
-					}
-
-					last = generalSymbol;
 				}
 			}
 		}
+
+		return follow;
 	}
 
 	// método para inicializar mapeamento nãoterminais -> conjunto de símbolos
