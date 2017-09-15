@@ -19,10 +19,6 @@ import junit.framework.TestCase;
 
 public class FollowSetTest extends TestCase {
 	
-	public static void main(String[] args) {
-		new FollowSetTest().testFollowSetG3();
-	}
-
 	public void testFollowSetG1() {
 		/*
 		 * Gramática de exemplo:

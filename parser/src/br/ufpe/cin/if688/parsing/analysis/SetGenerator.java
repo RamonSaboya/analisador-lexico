@@ -79,11 +79,11 @@ public final class SetGenerator {
 				} else if (generalSymbol instanceof Nonterminal) {
 					Nonterminal internalNonterminal = (Nonterminal) generalSymbol;
 
-					Set<GeneralSymbol> nonterminalFirstSet;
+					Set<GeneralSymbol> nonterminalFirstSet = new HashSet<GeneralSymbol>();
 					if (finalFirstSet.containsKey(internalNonterminal)) {
-						nonterminalFirstSet = finalFirstSet.get(internalNonterminal);
+						nonterminalFirstSet.addAll(finalFirstSet.get(internalNonterminal));
 					} else {
-						nonterminalFirstSet = getFirstSet(internalNonterminal, nonterminalToProductions);
+						nonterminalFirstSet.addAll(getFirstSet(internalNonterminal, nonterminalToProductions));
 					}
 
 					internalFirstSet.addAll(nonterminalFirstSet);
