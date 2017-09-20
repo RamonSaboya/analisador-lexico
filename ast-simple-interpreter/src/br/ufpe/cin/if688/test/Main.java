@@ -9,11 +9,13 @@ class Main {
 		//max args de um programa
 		// qual eh a quantidade maxima de argumentos passados para um print qualquer no programa
 		MaxArgsVisitor maxArgs = new MaxArgsVisitor();
-		System.out.println("MaxArgs printPrint: " + maxArgs.visit(Prog.printPrint));
 		System.out.println("MaxArgs Prog: " + maxArgs.visit(Prog.prog));
-		System.out.println("MaxArgs Prog2: " + maxArgs.visit(Prog.prog2));
+		System.out.println("MaxArgs print: " + maxArgs.visit(Prog.print));
 		System.out.println("MaxArgs print1234: " + maxArgs.visit(Prog.print1234));
-		System.out.println("MaxArgs progTeste: " + maxArgs.visit(Prog.progTest));
+		System.out.println("MaxArgs printPrint: " + maxArgs.visit(Prog.printPrint));
+		System.out.println("MaxArgs Prog2: " + maxArgs.visit(Prog.prog2));
+		System.out.println("MaxArgs Prog3: " + maxArgs.visit(Prog.prog3));
+		System.out.println("MaxArgs Prog5: " + maxArgs.visit(Prog.prog5));
 		
 		//interpretar programas(Prog.prog...);
 		System.out.println("===================================");

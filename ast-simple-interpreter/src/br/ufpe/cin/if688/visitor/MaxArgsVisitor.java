@@ -15,80 +15,106 @@ import br.ufpe.cin.if688.ast.Stm;
 
 public class MaxArgsVisitor implements IVisitor<Integer> {
 	
+	private static Stm ref = null;
+	
+	private int maxPrint;
+	
 	@Override
 	public Integer visit(Stm s) {
-		return s.accept(this);
+		if(ref == null) {
+			ref = s;
+			maxPrint = 0;
+		}
+		
+		s.accept(this);
+		
+		int result = maxPrint;
+		
+		if (ref == s) {
+			ref = null;
+			maxPrint = 0;
+		}
+		
+		return result;
 	}
 
 	@Override
 	public Integer visit(AssignStm s) {
-		Exp exp = s.getExp();
+		s.getExp().accept(this);
 		
-		return Math.max(1, exp.accept(this));
+		return 0;
 	}
 
 	@Override
 	public Integer visit(CompoundStm s) {
-		Stm stm1 = s.getStm1();
-		Stm stm2 = s.getStm2();
+		s.getStm1().accept(this);
+		s.getStm2().accept(this);
 		
-		return Math.max(stm1.accept(this), stm2.accept(this));
+		return 0;
 	}
 
 	@Override
 	public Integer visit(PrintStm s) {
-		ExpList expList = s.getExps();
+		int v = s.getExps().accept(this);
 		
-		return expList.accept(this);
+		maxPrint = Math.max(maxPrint, v);
+		
+		return maxPrint;
 	}
 
 	@Override
 	public Integer visit(Exp e) {
-		return e.accept(this);
+		e.accept(this);
+		
+		return 0;
 	}
 
 	@Override
 	public Integer visit(EseqExp e) {
-		Exp exp = e.getExp();
-		Stm stm = e.getStm();
+		e.getStm().accept(this);
+		e.getExp().accept(this);
 		
-		return Math.max(exp.accept(this), stm.accept(this));
+		return 0;
 	}
 
 	@Override
 	public Integer visit(IdExp e) {
-		return 1;
+		return 0;
 	}
 
 	@Override
 	public Integer visit(NumExp e) {
-		return 1;
+		return 0;
 	}
 
 	@Override
 	public Integer visit(OpExp e) {
-		return 2;
+		e.getLeft().accept(this);
+		e.getRight().accept(this);
+		
+		return 0;
 	}
 
 	@Override
 	public Integer visit(ExpList el) {
-		return el.accept(this);
+		el.accept(this);
+		
+		return 0;
 	}
 
 	@Override
 	public Integer visit(PairExpList el) {
-		Exp exp = el.getHead();
-		ExpList expList = el.getTail();
+		el.getHead().accept(this);
+		int v = el.getTail().accept(this);
 		
-		return Math.max(exp.accept(this), expList.accept(this));
+		return 1 + v;
 	}
 
 	@Override
 	public Integer visit(LastExpList el) {
-		Exp exp = el.getHead();
+		el.getHead().accept(this);
 		
-		return exp.accept(this);
+		return 1;
 	}
-	
 
 }
