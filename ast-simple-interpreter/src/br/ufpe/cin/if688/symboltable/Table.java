@@ -4,9 +4,16 @@ public class Table {
 	public String id;
 	public int value;
 	public Table tail;
+
 	public Table(String i, int v, Table t) {
 		id = i;
 		value = v;
 		tail = t;
 	}
+
+	@Override
+	public String toString() {
+		return id + "->" + value + " ==> " + tail;
+	}
+
 }

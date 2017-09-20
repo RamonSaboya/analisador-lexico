@@ -28,6 +28,11 @@ class Main {
 		interpreter = new Interpreter(null);
 		t = interpreter.visit(Prog.prog2);
 		if (t!=null) System.out.println(t.toString());
+		System.out.println("===================================");	
+		System.out.println("Prog.prog3");
+		interpreter = new Interpreter(null);
+		t = interpreter.visit(Prog.prog3);
+		if (t!=null) System.out.println(t.toString());
 		System.out.println("===================================");		
 		System.out.println("Prog.print1234");
 		interpreter = new Interpreter(null);
