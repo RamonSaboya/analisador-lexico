@@ -121,4 +121,18 @@ class Prog {
 							)
 					)
 				);
+			
+			// print(a,a-1)
+			static Stm progTest = new PrintStm(
+					new PairExpList(
+							new IdExp("a"), 
+							new LastExpList(
+								new OpExp(
+									new IdExp("a"),
+									OpExp.Minus, 
+									new NumExp(1)
+								)
+							)
+						)
+					);
 }

@@ -14,77 +14,80 @@ import br.ufpe.cin.if688.ast.PrintStm;
 import br.ufpe.cin.if688.ast.Stm;
 
 public class MaxArgsVisitor implements IVisitor<Integer> {
-
+	
 	@Override
 	public Integer visit(Stm s) {
-		// TODO Auto-generated method stub
-		return null;
+		return s.accept(this);
 	}
 
 	@Override
 	public Integer visit(AssignStm s) {
-		// TODO Auto-generated method stub
-		return null;
+		Exp exp = s.getExp();
+		
+		return Math.max(1, exp.accept(this));
 	}
 
 	@Override
 	public Integer visit(CompoundStm s) {
-		// TODO Auto-generated method stub
-		return null;
+		Stm stm1 = s.getStm1();
+		Stm stm2 = s.getStm2();
+		
+		return Math.max(stm1.accept(this), stm2.accept(this));
 	}
 
 	@Override
 	public Integer visit(PrintStm s) {
-		// TODO Auto-generated method stub
-		return null;
+		ExpList expList = s.getExps();
+		
+		return expList.accept(this);
 	}
 
 	@Override
 	public Integer visit(Exp e) {
-		// TODO Auto-generated method stub
-		return null;
+		return e.accept(this);
 	}
 
 	@Override
 	public Integer visit(EseqExp e) {
-		// TODO Auto-generated method stub
-		return null;
+		Exp exp = e.getExp();
+		Stm stm = e.getStm();
+		
+		return Math.max(exp.accept(this), stm.accept(this));
 	}
 
 	@Override
 	public Integer visit(IdExp e) {
-		// TODO Auto-generated method stub
-		return null;
+		return 1;
 	}
 
 	@Override
 	public Integer visit(NumExp e) {
-		// TODO Auto-generated method stub
-		return null;
+		return 1;
 	}
 
 	@Override
 	public Integer visit(OpExp e) {
-		// TODO Auto-generated method stub
-		return null;
+		return 2;
 	}
 
 	@Override
 	public Integer visit(ExpList el) {
-		// TODO Auto-generated method stub
-		return null;
+		return el.accept(this);
 	}
 
 	@Override
 	public Integer visit(PairExpList el) {
-		// TODO Auto-generated method stub
-		return null;
+		Exp exp = el.getHead();
+		ExpList expList = el.getTail();
+		
+		return Math.max(exp.accept(this), expList.accept(this));
 	}
 
 	@Override
 	public Integer visit(LastExpList el) {
-		// TODO Auto-generated method stub
-		return null;
+		Exp exp = el.getHead();
+		
+		return exp.accept(this);
 	}
 	
 

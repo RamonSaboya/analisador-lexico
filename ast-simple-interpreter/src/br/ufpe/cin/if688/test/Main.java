@@ -13,6 +13,7 @@ class Main {
 		System.out.println("MaxArgs Prog: " + maxArgs.visit(Prog.prog));
 		System.out.println("MaxArgs Prog2: " + maxArgs.visit(Prog.prog2));
 		System.out.println("MaxArgs print1234: " + maxArgs.visit(Prog.print1234));
+		System.out.println("MaxArgs progTeste: " + maxArgs.visit(Prog.progTest));
 		
 		//interpretar programas(Prog.prog...);
 		System.out.println("===================================");
