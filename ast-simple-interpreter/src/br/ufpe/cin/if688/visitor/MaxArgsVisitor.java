@@ -42,7 +42,7 @@ public class MaxArgsVisitor implements IVisitor<Integer> {
 	public Integer visit(AssignStm s) {
 		s.getExp().accept(this);
 		
-		return 0;
+		return maxPrint;
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class MaxArgsVisitor implements IVisitor<Integer> {
 		s.getStm1().accept(this);
 		s.getStm2().accept(this);
 		
-		return 0;
+		return maxPrint;
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class MaxArgsVisitor implements IVisitor<Integer> {
 	public Integer visit(Exp e) {
 		e.accept(this);
 		
-		return 0;
+		return maxPrint;
 	}
 
 	@Override
@@ -74,17 +74,17 @@ public class MaxArgsVisitor implements IVisitor<Integer> {
 		e.getStm().accept(this);
 		e.getExp().accept(this);
 		
-		return 0;
+		return maxPrint;
 	}
 
 	@Override
 	public Integer visit(IdExp e) {
-		return 0;
+		return maxPrint;
 	}
 
 	@Override
 	public Integer visit(NumExp e) {
-		return 0;
+		return maxPrint;
 	}
 
 	@Override
@@ -92,14 +92,14 @@ public class MaxArgsVisitor implements IVisitor<Integer> {
 		e.getLeft().accept(this);
 		e.getRight().accept(this);
 		
-		return 0;
+		return maxPrint;
 	}
 
 	@Override
 	public Integer visit(ExpList el) {
 		el.accept(this);
 		
-		return 0;
+		return maxPrint;
 	}
 
 	@Override

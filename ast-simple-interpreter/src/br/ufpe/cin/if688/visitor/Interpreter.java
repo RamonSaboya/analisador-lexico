@@ -27,150 +27,102 @@ public class Interpreter implements IVisitor<Table> {
 
 	@Override
 	public Table visit(Stm s) {
-		return interpStm(s, null);
+		return s.accept(this);
 	}
 
 	@Override
 	public Table visit(AssignStm s) {
-		// TODO Auto-generated method stub
-		return null;
+		String id = s.getId();
+		Exp exp = s.getExp();
+
+		Table table = exp.accept(this);
+		table.id = id;
+
+		this.t = table;
+
+		return this.t;
 	}
 
 	@Override
 	public Table visit(CompoundStm s) {
-		// TODO Auto-generated method stub
-		return null;
+		Stm stm1 = s.getStm1();
+		Stm stm2 = s.getStm2();
+
+		stm1.accept(this);
+		stm2.accept(this);
+
+		return this.t;
 	}
 
 	@Override
 	public Table visit(PrintStm s) {
-		// TODO Auto-generated method stub
-		return null;
+		ExpList expList = s.getExps();
+
+		expList.accept(this);
+
+		return this.t;
 	}
 
 	@Override
 	public Table visit(Exp e) {
-		// TODO Auto-generated method stub
-		return null;
+		return e.accept(this);
 	}
 
 	@Override
 	public Table visit(EseqExp e) {
-		// TODO Auto-generated method stub
-		return null;
+		IntAndTable intAndTable = new IntAndTableVisitor(this.t).visit(e);
+
+		int result = intAndTable.result;
+
+		return new Table("id", result, this.t);
 	}
 
 	@Override
 	public Table visit(IdExp e) {
-		// TODO Auto-generated method stub
-		return null;
+		IntAndTable intAndTable = new IntAndTableVisitor(this.t).visit(e);
+
+		int result = intAndTable.result;
+
+		return new Table("id", result, this.t);
 	}
 
 	@Override
 	public Table visit(NumExp e) {
-		// TODO Auto-generated method stub
-		return null;
+		IntAndTable intAndTable = new IntAndTableVisitor(this.t).visit(e);
+
+		int result = intAndTable.result;
+
+		return new Table("id", result, this.t);
 	}
 
 	@Override
 	public Table visit(OpExp e) {
-		// TODO Auto-generated method stub
-		return null;
+		IntAndTable intAndTable = new IntAndTableVisitor(this.t).visit(e);
+
+		int result = intAndTable.result;
+
+		return new Table("id", result, this.t);
 	}
 
 	@Override
 	public Table visit(ExpList el) {
-		// TODO Auto-generated method stub
-		return null;
+		return el.accept(this);
 	}
 
 	@Override
 	public Table visit(PairExpList el) {
-		// TODO Auto-generated method stub
-		return null;
+		System.out.print(el.getHead().accept(this).value + " ");
+
+		el.getTail().accept(this);
+
+		return this.t;
 	}
 
 	@Override
 	public Table visit(LastExpList el) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+		System.out.println(el.getHead().accept(this).value);
 
-	static void interp(Stm s) {
-		/* you write this part */
-		interpStm(s, null);
-	}
-
-	static Table interpStm(Stm s, Table t) {
-		if (s.getClass() == CompoundStm.class) {
-			Table cs1 = interpStm(((CompoundStm) s).getStm1(), t);
-			return interpStm(((CompoundStm) s).getStm2(), cs1);
-		} else if (s.getClass() == AssignStm.class) {
-			IntAndTable as1 = interpExp(((AssignStm) s).getExp(), t);
-			return new Table(((AssignStm) s).getId(), as1.result, as1.table);
-		} else if (s.getClass() == PrintStm.class) {
-			return print(((PrintStm) s).getExps(), t);
-		}
-
-		return null;
-	}
-
-	static Table print(ExpList e, Table t) {
-		if (e.getClass() == PairExpList.class) {
-			IntAndTable p1 = interpExp(((PairExpList) e).getHead(), t);
-			System.out.print(p1.result + " ");
-			return print(((PairExpList) e).getTail(), p1.table);
-		} else {
-			IntAndTable p2 = interpExp(((LastExpList) e).getHead(), t);
-			System.out.println(p2.result + " ");
-			return p2.table;
-		}
-	}
-
-	static IntAndTable interpExpList(ExpList e, Table t) {
-		if (e.getClass() == PairExpList.class) {
-			IntAndTable pe1 = interpExp(((PairExpList) e).getHead(), t);
-			return interpExpList(((PairExpList) e).getTail(), pe1.table);
-		} else if (e.getClass() == LastExpList.class) {
-			return interpExp(((LastExpList) e).getHead(), t);
-		}
-
-		// this shouldn't happen...
-		return null;
-	}
-
-	static IntAndTable interpExp(Exp e, Table t) {
-		if (e.getClass() == IdExp.class) {
-			return new IntAndTable(lookup(t, ((IdExp) e).getId()), t);
-		} else if (e.getClass() == NumExp.class) {
-			return new IntAndTable(((NumExp) e).getNum(), t);
-		} else if (e.getClass() == OpExp.class) {
-			IntAndTable oe1 = interpExp(((OpExp) e).getLeft(), t);
-			IntAndTable oe2 = interpExp(((OpExp) e).getRight(), oe1.table);
-			switch (((OpExp) e).getOper()) {
-			case 1:
-				return new IntAndTable(oe1.result + oe2.result, oe2.table);
-			case 2:
-				return new IntAndTable(oe1.result - oe2.result, oe2.table);
-			case 3:
-				return new IntAndTable(oe1.result * oe2.result, oe2.table);
-			case 4:
-				return new IntAndTable(oe1.result / oe2.result, oe2.table);
-			}
-		} else if (e.getClass() == EseqExp.class) {
-			Table es1 = interpStm(((EseqExp) e).getStm(), t);
-			return interpExp(((EseqExp) e).getExp(), es1);
-		}
-
-		return null;
-	}
-
-	static int lookup(Table t, String key) {
-		if (t.id == key) {
-			return t.value;
-		} else {
-			return lookup(t.tail, key);
-		}
+		return this.t;
 	}
 
 }

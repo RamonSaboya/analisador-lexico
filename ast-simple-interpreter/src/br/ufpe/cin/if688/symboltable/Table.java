@@ -13,7 +13,7 @@ public class Table {
 
 	@Override
 	public String toString() {
-		return id + "->" + value + " ==> " + tail;
+		return "[ " + id + "->" + value + " ==> " + tail + " ]";
 	}
 
 }

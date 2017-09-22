@@ -16,6 +16,7 @@ import br.ufpe.cin.if688.symboltable.IntAndTable;
 import br.ufpe.cin.if688.symboltable.Table;
 
 public class IntAndTableVisitor implements IVisitor<IntAndTable> {
+
 	private Table t;
 
 	public IntAndTableVisitor(Table t) {
@@ -24,75 +25,105 @@ public class IntAndTableVisitor implements IVisitor<IntAndTable> {
 
 	@Override
 	public IntAndTable visit(Stm s) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public IntAndTable visit(AssignStm s) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public IntAndTable visit(CompoundStm s) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public IntAndTable visit(PrintStm s) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public IntAndTable visit(Exp e) {
-		// TODO Auto-generated method stub
-		return null;
+		return e.accept(this);
 	}
 
 	@Override
 	public IntAndTable visit(EseqExp e) {
-		// TODO Auto-generated method stub
-		return null;
+		Stm stm = e.getStm();
+		Exp exp = e.getExp();
+
+		Table table = new Interpreter(t).visit(stm);
+		this.t = table;
+
+		return exp.accept(this);
 	}
 
 	@Override
 	public IntAndTable visit(IdExp e) {
-		// TODO Auto-generated method stub
-		return null;
+		String id = e.getId();
+
+		int result = lookup(this.t, id);
+
+		return new IntAndTable(result, this.t);
 	}
 
 	@Override
 	public IntAndTable visit(NumExp e) {
-		// TODO Auto-generated method stub
-		return null;
+		int num = e.getNum();
+
+		return new IntAndTable(num, this.t);
 	}
 
 	@Override
 	public IntAndTable visit(OpExp e) {
-		// TODO Auto-generated method stub
-		return null;
+		Exp left = e.getLeft();
+		int op = e.getOper();
+		Exp right = e.getRight();
+
+		int leftValue = left.accept(this).result;
+		int rightValue = right.accept(this).result;
+		int result = 0;
+
+		switch (op) {
+		case OpExp.Plus:
+			result = leftValue + rightValue;
+			break;
+		case OpExp.Minus:
+			result = leftValue - rightValue;
+			break;
+		case OpExp.Times:
+			result = leftValue * rightValue;
+			break;
+		case OpExp.Div:
+			result = leftValue / rightValue;
+			break;
+		}
+
+		return new IntAndTable(result, t);
 	}
 
 	@Override
 	public IntAndTable visit(ExpList el) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public IntAndTable visit(PairExpList el) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public IntAndTable visit(LastExpList el) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	private int lookup(Table t, String key) {
+		if (t.id == key) {
+			return t.value;
+		} else {
+			return lookup(t.tail, key);
+		}
+	}
 
 }
