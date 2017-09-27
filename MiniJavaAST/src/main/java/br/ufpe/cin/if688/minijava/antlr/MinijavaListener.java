@@ -38,6 +38,26 @@ public interface MinijavaListener extends ParseTreeListener {
 	 */
 	void exitClassDeclaration(MinijavaParser.ClassDeclarationContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MinijavaParser#classSimpleDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterClassSimpleDeclaration(MinijavaParser.ClassSimpleDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MinijavaParser#classSimpleDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitClassSimpleDeclaration(MinijavaParser.ClassSimpleDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MinijavaParser#classExtendsDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterClassExtendsDeclaration(MinijavaParser.ClassExtendsDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MinijavaParser#classExtendsDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitClassExtendsDeclaration(MinijavaParser.ClassExtendsDeclarationContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MinijavaParser#varDeclaration}.
 	 * @param ctx the parse tree
 	 */
@@ -87,4 +107,14 @@ public interface MinijavaListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExpression(MinijavaParser.ExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MinijavaParser#identifier}.
+	 * @param ctx the parse tree
+	 */
+	void enterIdentifier(MinijavaParser.IdentifierContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MinijavaParser#identifier}.
+	 * @param ctx the parse tree
+	 */
+	void exitIdentifier(MinijavaParser.IdentifierContext ctx);
 }
