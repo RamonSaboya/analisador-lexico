@@ -54,7 +54,7 @@ public class PrettyPrintVisitor implements IVisitor<Void> {
 		System.out.print("class ");
 		n.i1.accept(this);
 		System.out.println(" {");
-		System.out.print("  public static Void main (String [] ");
+		System.out.print("  public static void main (String [] ");
 		n.i2.accept(this);
 		System.out.println(") {");
 		System.out.print("    ");
