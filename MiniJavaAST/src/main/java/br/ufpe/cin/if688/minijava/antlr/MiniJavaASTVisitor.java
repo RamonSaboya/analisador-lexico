@@ -6,8 +6,6 @@ import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import br.ufpe.cin.if688.minijava.antlr.MiniJavaParser.ClassDeclarationContext;
-import br.ufpe.cin.if688.minijava.antlr.MiniJavaParser.ClassExtendsDeclarationContext;
-import br.ufpe.cin.if688.minijava.antlr.MiniJavaParser.ClassSimpleDeclarationContext;
 import br.ufpe.cin.if688.minijava.antlr.MiniJavaParser.ExpressionContext;
 import br.ufpe.cin.if688.minijava.antlr.MiniJavaParser.GoalContext;
 import br.ufpe.cin.if688.minijava.antlr.MiniJavaParser.IdentifierContext;
@@ -109,46 +107,25 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 
 	@Override
 	public Object visitClassDeclaration(ClassDeclarationContext ctx) {
-		if(ctx.classExtendsDeclaration() == null) {
-			return ctx.classSimpleDeclaration().accept(this); 
+		Identifier id = (Identifier) ctx.identifier(0).accept(this);
+		
+		VarDeclList vdl = new VarDeclList();
+		for(VarDeclarationContext vdc : ctx.varDeclaration()) {
+			vdl.addElement((VarDecl) vdc.accept(this));
+		}
+		
+		MethodDeclList mdl = new MethodDeclList();
+		for(MethodDeclarationContext mdc : ctx.methodDeclaration()) {
+			mdl.addElement((MethodDecl) mdc.accept(this));
+		}
+		
+		if(ctx.identifier().size() == 1) {
+			return new ClassDeclSimple(id, vdl, mdl);
 		} else {
-			return ctx.classExtendsDeclaration().accept(this); 
+			Identifier id2 = (Identifier) ctx.identifier(1).accept(this);
+			
+			return new ClassDeclExtends(id, id2, vdl, mdl);
 		}
-	}
-	
-	@Override
-	public Object visitClassSimpleDeclaration(ClassSimpleDeclarationContext ctx) {
-		Identifier id = (Identifier) ctx.identifier().accept(this);
-		
-		VarDeclList vdl = new VarDeclList();
-		for(VarDeclarationContext vdc : ctx.varDeclaration()) {
-			vdl.addElement((VarDecl) vdc.accept(this));
-		}
-		
-		MethodDeclList mdl = new MethodDeclList();
-		for(MethodDeclarationContext mdc : ctx.methodDeclaration()) {
-			mdl.addElement((MethodDecl) mdc.accept(this));
-		}
-		
-		return new ClassDeclSimple(id, vdl, mdl);
-	}
-	
-	@Override
-	public Object visitClassExtendsDeclaration(ClassExtendsDeclarationContext ctx) {
-		Identifier id1 = (Identifier) ctx.identifier(0).accept(this);
-		Identifier id2 = (Identifier) ctx.identifier(1).accept(this);
-		
-		VarDeclList vdl = new VarDeclList();
-		for(VarDeclarationContext vdc : ctx.varDeclaration()) {
-			vdl.addElement((VarDecl) vdc.accept(this));
-		}
-		
-		MethodDeclList mdl = new MethodDeclList();
-		for(MethodDeclarationContext mdc : ctx.methodDeclaration()) {
-			mdl.addElement((MethodDecl) mdc.accept(this));
-		}
-		
-		return new ClassDeclExtends(id1, id2, vdl, mdl);
 	}
 
 	@Override

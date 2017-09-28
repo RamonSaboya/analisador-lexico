@@ -73,4 +73,12 @@ public class Main {
 		ppv.visit(prog);
 	}
 
+	@Test
+	public void test7() throws IOException {
+		Program prog = (Program) new MiniJavaASTVisitor().visit(fromFile("Simple.java").goal());
+
+		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
+		ppv.visit(prog);
+	}
+
 }
