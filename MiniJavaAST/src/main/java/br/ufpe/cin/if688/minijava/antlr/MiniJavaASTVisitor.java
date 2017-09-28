@@ -46,6 +46,7 @@ import br.ufpe.cin.if688.minijava.ast.Minus;
 import br.ufpe.cin.if688.minijava.ast.NewArray;
 import br.ufpe.cin.if688.minijava.ast.NewObject;
 import br.ufpe.cin.if688.minijava.ast.Not;
+import br.ufpe.cin.if688.minijava.ast.Plus;
 import br.ufpe.cin.if688.minijava.ast.Print;
 import br.ufpe.cin.if688.minijava.ast.Program;
 import br.ufpe.cin.if688.minijava.ast.Statement;
@@ -250,7 +251,7 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 				case "<":
 					return new LessThan(exp1, exp2);
 				case "+":
-					return new And(exp1, exp2);
+					return new Plus(exp1, exp2);
 				case "-":
 					return new Minus(exp1, exp2);
 				default:
