@@ -29,6 +29,18 @@ public interface MiniJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitClassDeclaration(MiniJavaParser.ClassDeclarationContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MiniJavaParser#classSimpleDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClassSimpleDeclaration(MiniJavaParser.ClassSimpleDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MiniJavaParser#classExtendsDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClassExtendsDeclaration(MiniJavaParser.ClassExtendsDeclarationContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MiniJavaParser#varDeclaration}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -64,4 +76,10 @@ public interface MiniJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitIdentifier(MiniJavaParser.IdentifierContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MiniJavaParser#integerLiteral}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIntegerLiteral(MiniJavaParser.IntegerLiteralContext ctx);
 }

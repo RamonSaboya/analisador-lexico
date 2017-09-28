@@ -4,7 +4,11 @@ goal: mainClass ( classDeclaration )* EOF;
 
 mainClass : 'class' identifier '{' 'public' 'static' 'void' 'main' '(' 'String' '[' ']' identifier ')' '{' statement '}' '}';
 
-classDeclaration: 'class' identifier ( 'extends' identifier )? '{' ( varDeclaration )* ( methodDeclaration )* '}';
+classDeclaration: classSimpleDeclaration | classExtendsDeclaration;
+
+classSimpleDeclaration: 'class' identifier '{' ( varDeclaration )* ( methodDeclaration )* '}';
+
+classExtendsDeclaration: 'class' identifier 'extends' identifier '{' ( varDeclaration )* ( methodDeclaration )* '}';
 
 varDeclaration: type identifier ';';
 
@@ -26,7 +30,7 @@ expression: expression ( '&&' | '<' | '+' | '-' | '*' ) expression
 | expression '[' expression ']'
 | expression '.' 'length'
 | expression '.' identifier '(' ( expression ( ',' expression )* )? ')'
-| INTEGER_LITERAL
+| integerLiteral
 | 'true'
 | 'false'
 | identifier
@@ -37,6 +41,7 @@ expression: expression ( '&&' | '<' | '+' | '-' | '*' ) expression
 | '(' expression ')';
 
 identifier: IDENTIFIER;
+integerLiteral: INTEGER_LITERAL;
 
 COMMENT: '/*' .*? '*/' -> skip;
 LINE_COMMENT: '//' ~[\r\n]* -> skip;

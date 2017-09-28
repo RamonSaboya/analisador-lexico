@@ -1,53 +1,76 @@
 package br.ufpe.cin.if688.minijava.main;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
-import br.ufpe.cin.if688.minijava.ast.BooleanType;
-import br.ufpe.cin.if688.minijava.ast.ClassDeclExtends;
-import br.ufpe.cin.if688.minijava.ast.ClassDeclList;
-import br.ufpe.cin.if688.minijava.ast.ClassDeclSimple;
-import br.ufpe.cin.if688.minijava.ast.Identifier;
-import br.ufpe.cin.if688.minijava.ast.IdentifierType;
-import br.ufpe.cin.if688.minijava.ast.IntegerLiteral;
-import br.ufpe.cin.if688.minijava.ast.IntegerType;
-import br.ufpe.cin.if688.minijava.ast.MainClass;
-import br.ufpe.cin.if688.minijava.ast.MethodDeclList;
-import br.ufpe.cin.if688.minijava.ast.Print;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.junit.Test;
+
+import br.ufpe.cin.if688.minijava.antlr.MiniJavaASTVisitor;
+import br.ufpe.cin.if688.minijava.antlr.MiniJavaLexer;
+import br.ufpe.cin.if688.minijava.antlr.MiniJavaParser;
 import br.ufpe.cin.if688.minijava.ast.Program;
-import br.ufpe.cin.if688.minijava.ast.VarDecl;
-import br.ufpe.cin.if688.minijava.ast.VarDeclList;
 import br.ufpe.cin.if688.minijava.visitor.PrettyPrintVisitor;
 
+@SuppressWarnings("deprecation")
 public class Main {
 
-	public static void main(String[] args) throws IOException {
-		MainClass main = new MainClass(new Identifier("Teste"), new Identifier("Testando"),
-				new Print(new IntegerLiteral(2)));
+	private MiniJavaParser fromFile(String file) throws IOException {
+		InputStream stream = new FileInputStream("src/test/resources/" + file);
+		ANTLRInputStream input = new ANTLRInputStream(stream);
+		MiniJavaLexer lexer = new MiniJavaLexer(input);
+		CommonTokenStream token = new CommonTokenStream(lexer);
+		return new MiniJavaParser(token);
+	}
 
-		VarDeclList vdl1 = new VarDeclList();
-		vdl1.addElement(new VarDecl(new BooleanType(), new Identifier("flag")));
-		vdl1.addElement(new VarDecl(new IntegerType(), new Identifier("num")));
-
-		MethodDeclList mdl = new MethodDeclList();
-
-		ClassDeclSimple A = new ClassDeclSimple(new Identifier("A"), vdl1, mdl);
-
-		ClassDeclExtends B = new ClassDeclExtends(new Identifier("B"), new Identifier("A"), new VarDeclList(),
-				new MethodDeclList());
-
-		VarDeclList vdl2 = new VarDeclList();
-		vdl2.addElement(new VarDecl(new IdentifierType("A"), new Identifier("obj")));
-		ClassDeclSimple C = new ClassDeclSimple(new Identifier("C"), vdl2, new MethodDeclList());
-
-		ClassDeclList cdl = new ClassDeclList();
-		cdl.addElement(A);
-		cdl.addElement(B);
-		cdl.addElement(C);
-
-		Program p = new Program(main, cdl);
+	@Test
+	public void test1() throws IOException {
+		Program prog = (Program) new MiniJavaASTVisitor().visit(fromFile("BinarySearch.java").goal());
 
 		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
-		ppv.visit(p);
+		ppv.visit(prog);
+	}
+
+	@Test
+	public void test2() throws IOException {
+		Program prog = (Program) new MiniJavaASTVisitor().visit(fromFile("BinaryTree.java").goal());
+
+		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
+		ppv.visit(prog);
+	}
+
+	@Test
+	public void test3() throws IOException {
+		Program prog = (Program) new MiniJavaASTVisitor().visit(fromFile("BubbleSort.java").goal());
+
+		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
+		ppv.visit(prog);
+	}
+
+	@Test
+	public void test4() throws IOException {
+		Program prog = (Program) new MiniJavaASTVisitor().visit(fromFile("LinearSearch.java").goal());
+
+		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
+		ppv.visit(prog);
+	}
+
+	@Test
+	public void test5() throws IOException {
+		Program prog = (Program) new MiniJavaASTVisitor().visit(fromFile("LinkedList.java").goal());
+
+		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
+		ppv.visit(prog);
+	}
+
+	@Test
+	public void test6() throws IOException {
+		Program prog = (Program) new MiniJavaASTVisitor().visit(fromFile("QuickSort.java").goal());
+
+		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
+		ppv.visit(prog);
 	}
 
 }
