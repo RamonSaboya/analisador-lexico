@@ -12,9 +12,9 @@ public class Teste {
 	public void Teste() throws Exception {
 		InputStream stream = new FileInputStream("src/test/resources/BinaryTree.java");
 		ANTLRInputStream input = new ANTLRInputStream(stream);
-		MinijavaLexer lexer = new MinijavaLexer(input);
+		MiniJavaLexer lexer = new MiniJavaLexer(input);
 		CommonTokenStream token = new CommonTokenStream(lexer);
-		MinijavaParser parser = new MinijavaParser(token);
+		MiniJavaParser parser = new MiniJavaParser(token);
 		parser.goal();
 		assert parser.getNumberOfSyntaxErrors() == 0;
 		
