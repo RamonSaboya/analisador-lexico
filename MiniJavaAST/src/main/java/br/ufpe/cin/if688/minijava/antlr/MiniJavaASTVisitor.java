@@ -67,19 +67,16 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 
 	@Override
 	public Object visitChildren(RuleNode node) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Object visitTerminal(TerminalNode node) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Object visitErrorNode(ErrorNode node) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -87,11 +84,11 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 	public Object visitGoal(GoalContext ctx) {
 		MainClass mainClass = (MainClass) ctx.mainClass().accept(this);
 		ClassDeclList cdl = new ClassDeclList();
-		
-		for(ClassDeclarationContext cdc : ctx.classDeclaration()) {
+
+		for (ClassDeclarationContext cdc : ctx.classDeclaration()) {
 			cdl.addElement((ClassDecl) cdc.accept(this));
 		}
-		
+
 		return new Program(mainClass, cdl);
 	}
 
@@ -99,31 +96,31 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 	public Object visitMainClass(MainClassContext ctx) {
 		Identifier id1 = (Identifier) ctx.identifier(0).accept(this);
 		Identifier id2 = (Identifier) ctx.identifier(1).accept(this);
-		
+
 		Statement stm = (Statement) ctx.statement().accept(this);
-		
+
 		return new MainClass(id1, id2, stm);
 	}
 
 	@Override
 	public Object visitClassDeclaration(ClassDeclarationContext ctx) {
 		Identifier id = (Identifier) ctx.identifier(0).accept(this);
-		
+
 		VarDeclList vdl = new VarDeclList();
-		for(VarDeclarationContext vdc : ctx.varDeclaration()) {
+		for (VarDeclarationContext vdc : ctx.varDeclaration()) {
 			vdl.addElement((VarDecl) vdc.accept(this));
 		}
-		
+
 		MethodDeclList mdl = new MethodDeclList();
-		for(MethodDeclarationContext mdc : ctx.methodDeclaration()) {
+		for (MethodDeclarationContext mdc : ctx.methodDeclaration()) {
 			mdl.addElement((MethodDecl) mdc.accept(this));
 		}
-		
-		if(ctx.identifier().size() == 1) {
+
+		if (ctx.identifier().size() == 1) {
 			return new ClassDeclSimple(id, vdl, mdl);
 		} else {
 			Identifier id2 = (Identifier) ctx.identifier(1).accept(this);
-			
+
 			return new ClassDeclExtends(id, id2, vdl, mdl);
 		}
 	}
@@ -132,7 +129,7 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 	public Object visitVarDeclaration(VarDeclarationContext ctx) {
 		Type type = (Type) ctx.type().accept(this);
 		Identifier id = (Identifier) ctx.identifier().accept(this);
-		
+
 		return new VarDecl(type, id);
 	}
 
@@ -140,32 +137,32 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 	public Object visitMethodDeclaration(MethodDeclarationContext ctx) {
 		Type type = (Type) ctx.type(0).accept(this);
 		Identifier id = (Identifier) ctx.identifier(0).accept(this);
-		
+
 		FormalList fl = new FormalList();
-		for(int i = 1; i < ctx.type().size(); i++) {
+		for (int i = 1; i < ctx.type().size(); i++) {
 			fl.addElement(new Formal((Type) ctx.type(i).accept(this), (Identifier) ctx.identifier(i).accept(this)));
 		}
-		
+
 		VarDeclList vdl = new VarDeclList();
-		for(VarDeclarationContext vdc : ctx.varDeclaration()) {
+		for (VarDeclarationContext vdc : ctx.varDeclaration()) {
 			vdl.addElement((VarDecl) vdc.accept(this));
 		}
-		
+
 		StatementList sl = new StatementList();
-		for(StatementContext sc : ctx.statement()) {
+		for (StatementContext sc : ctx.statement()) {
 			sl.addElement((Statement) sc.accept(this));
 		}
-		
+
 		Exp exp = (Exp) ctx.expression().accept(this);
-		
+
 		return new MethodDecl(type, id, fl, vdl, sl, exp);
 	}
 
 	@Override
 	public Object visitType(TypeContext ctx) {
 		String value = ctx.getText();
-		
-		switch(value.toLowerCase()) {
+
+		switch (value.toLowerCase()) {
 		case "int":
 			return new IntegerType();
 		case "int[]":
@@ -180,40 +177,40 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 	@Override
 	public Object visitStatement(StatementContext ctx) {
 		String start = ctx.getStart().getText();
-		
-		if(start.equalsIgnoreCase("{")) {
+
+		if (start.equalsIgnoreCase("{")) {
 			StatementList sl = new StatementList();
-			
-			for(StatementContext sc : ctx.statement()) {
+
+			for (StatementContext sc : ctx.statement()) {
 				sl.addElement((Statement) sc.accept(this));
 			}
-			
+
 			return new Block(sl);
-		} else if(start.equalsIgnoreCase("if")) {
+		} else if (start.equalsIgnoreCase("if")) {
 			Exp exp = (Exp) ctx.expression(0).accept(this);
 			Statement stm1 = (Statement) ctx.statement(0).accept(this);
 			Statement stm2 = (Statement) ctx.statement(1).accept(this);
-			
+
 			return new If(exp, stm1, stm2);
-		} else if(start.equalsIgnoreCase("while")) {
+		} else if (start.equalsIgnoreCase("while")) {
 			Exp exp = (Exp) ctx.expression(0).accept(this);
 			Statement stm = (Statement) ctx.statement(0).accept(this);
-			
+
 			return new While(exp, stm);
-		} else if(start.equalsIgnoreCase("System.out.println")) {
+		} else if (start.equalsIgnoreCase("System.out.println")) {
 			Exp exp = (Exp) ctx.expression(0).accept(this);
-			
+
 			return new Print(exp);
-		} else if(ctx.expression().size() == 1) {
+		} else if (ctx.expression().size() == 1) {
 			Identifier id = (Identifier) ctx.identifier().accept(this);
 			Exp exp = (Exp) ctx.expression(0).accept(this);
-			
+
 			return new Assign(id, exp);
 		} else {
 			Identifier id = (Identifier) ctx.identifier().accept(this);
 			Exp exp1 = (Exp) ctx.expression(0).accept(this);
 			Exp exp2 = (Exp) ctx.expression(1).accept(this);
-			
+
 			return new ArrayAssign(id, exp1, exp2);
 		}
 	}
@@ -223,32 +220,31 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 		int expAmount = ctx.expression().size();
 		int childAmount = ctx.getChildCount();
 		String start = ctx.getStart().getText();
-		
-		if(childAmount >= 5) {
+
+		if (childAmount >= 5) {
 			String op = ctx.getChild(3).getText();
-			if(op.equals("(")) {
+			if (op.equals("(")) {
 				Exp exp = (Exp) ctx.expression(0).accept(this);
 				Identifier id = (Identifier) ctx.identifier().accept(this);
-				
+
 				ExpList el = new ExpList();
-				for(int i = 1; i < ctx.expression().size(); i++) {
+				for (int i = 1; i < ctx.expression().size(); i++) {
 					el.addElement((Exp) ctx.expression(i).accept(this));
 				}
-				
 
 				return new Call(exp, id, el);
 			}
 		}
-		
-		if(expAmount == 2) {
+
+		if (expAmount == 2) {
 			Exp exp1 = (Exp) ctx.expression(0).accept(this);
 			Exp exp2 = (Exp) ctx.expression(1).accept(this);
-			
+
 			String op = ctx.getChild(1).getText();
-			
-			if(childAmount == 3) {
-				
-				switch(op) {
+
+			if (childAmount == 3) {
+
+				switch (op) {
 				case "&&":
 					return new And(exp1, exp2);
 				case "<":
@@ -263,29 +259,29 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 			} else {
 				return new ArrayLookup(exp1, exp2);
 			}
-		} else if(expAmount == 1) {
+		} else if (expAmount == 1) {
 			Exp exp = (Exp) ctx.expression(0).accept(this);
-			
+
 			String op = ctx.getChild(1).getText();
-			
-			if(start.equals("!")) {
+
+			if (start.equals("!")) {
 				return new Not(exp);
-			} else if(start.equals("(")) {
+			} else if (start.equals("(")) {
 				return (Exp) ctx.expression(0).accept(this);
-			} else if(op.equals(".")) {
+			} else if (op.equals(".")) {
 				return new ArrayLength(exp);
 			} else {
 				return new NewArray(exp);
 			}
-		} else if(start.equals("new")) {
+		} else if (start.equals("new")) {
 			return new NewObject((Identifier) ctx.identifier().accept(this));
-		} else if(start.equals("this")) {
+		} else if (start.equals("this")) {
 			return new This();
-		} else if(start.endsWith("true")) {
+		} else if (start.endsWith("true")) {
 			return new True();
-		} else if(start.endsWith("false")) {
+		} else if (start.endsWith("false")) {
 			return new False();
-		} else if(start.matches("\\d+")) {
+		} else if (start.matches("\\d+")) {
 			return (IntegerLiteral) ctx.integerLiteral().accept(this);
 		} else {
 			return (Identifier) ctx.identifier().accept(this);
@@ -301,5 +297,5 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 	public Object visitIntegerLiteral(IntegerLiteralContext ctx) {
 		return new IntegerLiteral(Integer.parseInt(ctx.getText()));
 	}
-	
+
 }
