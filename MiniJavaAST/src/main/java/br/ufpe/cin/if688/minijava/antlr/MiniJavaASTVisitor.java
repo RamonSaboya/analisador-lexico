@@ -163,7 +163,7 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 	public Object visitType(TypeContext ctx) {
 		String value = ctx.getText();
 
-		switch (value.toLowerCase()) {
+		switch (value) {
 		case "int":
 			return new IntegerType();
 		case "int[]":
@@ -223,18 +223,15 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 		String start = ctx.getStart().getText();
 
 		if (childAmount >= 5) {
-			String op = ctx.getChild(3).getText();
-			if (op.equals("(")) {
-				Exp exp = (Exp) ctx.expression(0).accept(this);
-				Identifier id = (Identifier) ctx.identifier().accept(this);
+			Exp exp = (Exp) ctx.expression(0).accept(this);
+			Identifier id = (Identifier) ctx.identifier().accept(this);
 
-				ExpList el = new ExpList();
-				for (int i = 1; i < ctx.expression().size(); i++) {
-					el.addElement((Exp) ctx.expression(i).accept(this));
-				}
-
-				return new Call(exp, id, el);
+			ExpList el = new ExpList();
+			for (int i = 1; i < ctx.expression().size(); i++) {
+				el.addElement((Exp) ctx.expression(i).accept(this));
 			}
+
+			return new Call(exp, id, el);
 		}
 
 		if (expAmount == 2) {
@@ -244,7 +241,6 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 			String op = ctx.getChild(1).getText();
 
 			if (childAmount == 3) {
-
 				switch (op) {
 				case "&&":
 					return new And(exp1, exp2);
@@ -263,16 +259,14 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 		} else if (expAmount == 1) {
 			Exp exp = (Exp) ctx.expression(0).accept(this);
 
-			String op = ctx.getChild(1).getText();
-
 			if (start.equals("!")) {
 				return new Not(exp);
 			} else if (start.equals("(")) {
 				return (Exp) ctx.expression(0).accept(this);
-			} else if (op.equals(".")) {
-				return new ArrayLength(exp);
-			} else {
+			} else if (start.equals("new")) {
 				return new NewArray(exp);
+			} else {
+				return new ArrayLength(exp);
 			}
 		} else if (start.equals("new")) {
 			return new NewObject((Identifier) ctx.identifier().accept(this));
