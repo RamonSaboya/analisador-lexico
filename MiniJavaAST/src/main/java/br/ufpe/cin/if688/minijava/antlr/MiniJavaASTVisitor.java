@@ -268,7 +268,8 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
  
             ExpList el = new ExpList();
             for (int i = 1; i < ctx.expression().size(); i++) {
-            	if(ctx.expression(i).accept(this) instanceof Exp) el.addElement((Exp) ctx.expression(i).accept(this));
+            	Object aux = ctx.expression(i).accept(this);
+            	if(aux instanceof Exp) el.addElement((Exp) aux);
             	else {
             		IdentifierExp ie = new IdentifierExp(ctx.expression(i).getText());
             		el.addElement(ie);
