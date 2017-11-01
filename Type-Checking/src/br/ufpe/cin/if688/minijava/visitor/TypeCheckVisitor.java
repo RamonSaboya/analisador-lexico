@@ -69,9 +69,11 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 	// Statement s;
 	public Type visit(MainClass n) {
 		this.currClass = this.symbolTable.getClass(n.i1.toString());
+		this.currMethod = this.symbolTable.getMethod("main", this.currClass.getId());
 		n.i1.accept(this);
 		n.i2.accept(this);
 		n.s.accept(this);
+		this.currMethod = null;
 		this.currClass = null;
 		return null;
 	}
@@ -336,7 +338,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 				for (int i = 0; i < n.el.size(); i++) {
 					if(!this.symbolTable.compareTypes(n.el.elementAt(i).accept(this),methodCall.getParamAt(i).type())) {
 						System.out.println("Incompatible types: " + this.getTypeName(n.el.elementAt(i).accept(this)) + 
-								" cannot be converted to " + this.getTypeName(methodCall.getParamAt(i).type()) + ". Some messages have been simplified.");
+								" cannot be converted to " + this.getTypeName(methodCall.getParamAt(i).type()) + ". Some messages may been simplified.");
 						i = n.el.size();
 					}
 				}
@@ -366,7 +368,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 		if(identifierExp == null) {
 			System.out.println("Cannot find symbol "+n.s);
 		}
-		return new IdentifierType(n.s);
+		return identifierExp;
 	}
 
 	public Type visit(This n) {
