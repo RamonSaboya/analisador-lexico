@@ -12,7 +12,9 @@ import br.ufpe.cin.if688.minijava.antlr.MiniJavaASTVisitor;
 import br.ufpe.cin.if688.minijava.antlr.MiniJavaLexer;
 import br.ufpe.cin.if688.minijava.antlr.MiniJavaParser;
 import br.ufpe.cin.if688.minijava.ast.Program;
+import br.ufpe.cin.if688.minijava.visitor.BuildSymbolTableVisitor;
 import br.ufpe.cin.if688.minijava.visitor.PrettyPrintVisitor;
+import br.ufpe.cin.if688.minijava.visitor.TypeCheckVisitor;
 
 @SuppressWarnings("deprecation")
 public class Main {
@@ -31,9 +33,14 @@ public class Main {
 
 		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
 		ppv.visit(prog);
+		
+		BuildSymbolTableVisitor symbolTable = new BuildSymbolTableVisitor();
+		prog.accept(symbolTable);
+		TypeCheckVisitor typeCheck = new TypeCheckVisitor(symbolTable.getSymbolTable());
+		prog.accept(typeCheck);
 	}
 
-	@Test
+	/*@Test
 	public void test2() throws IOException {
 		Program prog = (Program) new MiniJavaASTVisitor().visit(fromFile("BinaryTree.java").goal());
 
@@ -79,6 +86,6 @@ public class Main {
 
 		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
 		ppv.visit(prog);
-	}
+	}*/
 
 }
