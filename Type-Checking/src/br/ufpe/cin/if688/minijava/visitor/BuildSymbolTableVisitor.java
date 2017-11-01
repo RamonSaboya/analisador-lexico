@@ -70,8 +70,10 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 	public Void visit(MainClass n) {
 		this.symbolTable.addClass(n.i1.toString(), null);
 		this.currClass = this.symbolTable.getClass(n.i1.toString());
+		this.currClass.addMethod("main", null);
 		Type t = new IntegerType();
-		this.currClass.addVar(n.i2.toString(),t);
+		this.currClass.getMethod("main").addParam(n.i2.toString(), t);	
+		//this.currClass.addVar(n.i2.toString(),t);
 		n.i1.accept(this);
 		n.i2.accept(this);
 		n.s.accept(this);
