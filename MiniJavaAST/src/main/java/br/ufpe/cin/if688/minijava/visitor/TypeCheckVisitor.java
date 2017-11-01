@@ -47,7 +47,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 	private Class currParent;
 	private Method currMethod;
 	private boolean fromVariable;
-	
+	private boolean fromMethod;
 	
 	public TypeCheckVisitor(SymbolTable st) {
 		this.symbolTable = st;
@@ -55,6 +55,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 		this.currParent = null;
 		this.currMethod = null;
 		this.fromVariable = false;
+		this.fromMethod = false;
 	}
 
 	// MainClass m;
@@ -73,7 +74,9 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 		this.currClass = this.symbolTable.getClass(n.i1.toString());
 		this.currMethod = this.symbolTable.getMethod("main", this.currClass.getId());
 		n.i1.accept(this);
+		this.fromVariable = true;
 		n.i2.accept(this);
+		this.fromVariable = false;
 		n.s.accept(this);
 		this.currMethod = null;
 		this.currClass = null;
@@ -119,8 +122,8 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 	// Type t;
 	// Identifier i;
 	public Type visit(VarDecl n) {
-		this.fromVariable = true;
 		Type type = n.t.accept(this);
+		this.fromVariable = true;
 		n.i.accept(this);
 		this.fromVariable = false;
 		return type;
@@ -135,7 +138,9 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 	public Type visit(MethodDecl n) {
 		this.currMethod = this.symbolTable.getMethod(n.i.toString(), this.currClass.getId());
 		Type expected = n.t.accept(this);
+		this.fromMethod = true;
 		n.i.accept(this);
+		this.fromMethod = false;
 		for (int i = 0; i < n.fl.size(); i++) {
 			n.fl.elementAt(i).accept(this);
 		}
@@ -157,8 +162,8 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 	// Type t;
 	// Identifier i;
 	public Type visit(Formal n) {
-		this.fromVariable = true;
 		Type type = n.t.accept(this);
+		this.fromVariable = true;
 		n.i.accept(this);
 		this.fromVariable = false;
 		return type;
@@ -225,7 +230,9 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 	// Exp e;
 	public Type visit(Assign n) {
 		Type identifier = this.symbolTable.getVarType(this.currMethod, this.currClass, n.i.toString());
+		this.fromVariable = true;
 		n.i.accept(this);
+		this.fromVariable = false;
 		Type expression = n.e.accept(this);
 		if(!this.symbolTable.compareTypes(identifier,expression)) {
 			System.out.println("Incompatible types: " + this.getTypeName(expression) + " cannot be converted to " + this.getTypeName(identifier) + ".");
@@ -337,11 +344,17 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 		Type classType = n.e.accept(this);
 		Type type = null;
 		if(classType instanceof IdentifierType) {
+			Class classCall = this.symbolTable.getClass(((IdentifierType) classType).s);
 			Method methodCall = this.symbolTable.getMethod(n.i.toString(), ((IdentifierType) classType).s);
 			if(methodCall == null) {
 				System.out.println("Cannot find symbol " + n.i.toString());
 			} else {
+				this.fromMethod = true;
+				Class previousClass = this.currClass;
+				this.currClass = classCall;
 				n.i.accept(this);
+				this.currClass = previousClass;
+				this.fromMethod = false;
 				type = methodCall.type();
 				for (int i = 0; i < n.el.size(); i++) {
 					if(!this.symbolTable.compareTypes(n.el.elementAt(i).accept(this),methodCall.getParamAt(i).type())) {
@@ -415,9 +428,18 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 				System.out.println("Cannot find symbol " + n.toString() + ".");
 			}
 			return identifier;
+		} else if(this.fromMethod){
+			if(this.currClass.containsMethod(n.toString())) {
+				return this.currClass.getMethod(n.toString()).type();
+			} else {
+				System.out.println("Cannot find symbol " + n.toString() + ".");
+			}
 		} else {
 			if(this.symbolTable.containsClass(n.toString())) {
 				return this.symbolTable.getClass(n.toString()).type();
+			} else {
+				
+				System.out.println("Cannot find symbol " + n.toString() + ".");
 			}
 		}
 		return new IdentifierType(n.toString());
