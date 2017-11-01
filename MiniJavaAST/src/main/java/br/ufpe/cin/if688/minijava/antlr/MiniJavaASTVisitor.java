@@ -33,6 +33,7 @@ import br.ufpe.cin.if688.minijava.ast.False;
 import br.ufpe.cin.if688.minijava.ast.Formal;
 import br.ufpe.cin.if688.minijava.ast.FormalList;
 import br.ufpe.cin.if688.minijava.ast.Identifier;
+import br.ufpe.cin.if688.minijava.ast.IdentifierExp;
 import br.ufpe.cin.if688.minijava.ast.IdentifierType;
 import br.ufpe.cin.if688.minijava.ast.If;
 import br.ufpe.cin.if688.minijava.ast.IntArrayType;
@@ -153,8 +154,13 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 		for (StatementContext sc : ctx.statement()) {
 			sl.addElement((Statement) sc.accept(this));
 		}
-
-		Exp exp = (Exp) ctx.expression().accept(this);
+		Object aux = ctx.expression().accept(this);
+		Exp exp;
+		if(aux instanceof Exp) {
+			exp = (Exp) ctx.expression().accept(this);
+		} else {
+			exp = new IdentifierExp(ctx.expression().getText());
+		}
 
 		return new MethodDecl(type, id, fl, vdl, sl, exp);
 	}
@@ -188,13 +194,27 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 
 			return new Block(sl);
 		} else if (start.equalsIgnoreCase("if")) {
-			Exp exp = (Exp) ctx.expression(0).accept(this);
+			
+			Object aux = ctx.expression(0).accept(this);
+			Exp exp;
+			if(aux instanceof Exp) {
+				exp = (Exp) aux;
+			} else {
+				exp = new IdentifierExp(ctx.expression(0).getText());
+			}
+			
 			Statement stm1 = (Statement) ctx.statement(0).accept(this);
 			Statement stm2 = (Statement) ctx.statement(1).accept(this);
 
 			return new If(exp, stm1, stm2);
 		} else if (start.equalsIgnoreCase("while")) {
-			Exp exp = (Exp) ctx.expression(0).accept(this);
+			Object aux = ctx.expression(0).accept(this);
+			Exp exp;
+			if(aux instanceof Exp) {
+				exp = (Exp) aux;
+			} else {
+				exp = new IdentifierExp(ctx.expression(0).getText());
+			}
 			Statement stm = (Statement) ctx.statement(0).accept(this);
 
 			return new While(exp, stm);
@@ -204,13 +224,33 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 			return new Print(exp);
 		} else if (ctx.expression().size() == 1) {
 			Identifier id = (Identifier) ctx.identifier().accept(this);
-			Exp exp = (Exp) ctx.expression(0).accept(this);
-
+			Object aux = ctx.expression(0).accept(this);
+			Exp exp;
+			if(aux instanceof Exp) {
+				exp = (Exp)aux;
+			} else {
+				exp =  new IdentifierExp(ctx.expression(0).getText());
+			}
+			
 			return new Assign(id, exp);
 		} else {
 			Identifier id = (Identifier) ctx.identifier().accept(this);
-			Exp exp1 = (Exp) ctx.expression(0).accept(this);
-			Exp exp2 = (Exp) ctx.expression(1).accept(this);
+			
+			Object aux1 = ctx.expression(0).accept(this);
+			Object aux2 = ctx.expression(1).accept(this);
+			Exp exp1,exp2;
+			if(aux1 instanceof Exp) {
+				exp1 = (Exp)aux1;
+			} else {
+				exp1 =  new IdentifierExp(ctx.expression(0).getText());
+			}
+			
+			if(aux2 instanceof Exp) {
+				exp2 = (Exp) aux2;
+			} else {
+				exp2 =  new IdentifierExp(ctx.expression(0).getText());
+			}
+			
 
 			return new ArrayAssign(id, exp1, exp2);
 		}
@@ -222,22 +262,42 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 		int childAmount = ctx.getChildCount();
 		String start = ctx.getStart().getText();
 
-		if (childAmount >= 5) {
-			Exp exp = (Exp) ctx.expression(0).accept(this);
-			Identifier id = (Identifier) ctx.identifier().accept(this);
-
-			ExpList el = new ExpList();
-			for (int i = 1; i < ctx.expression().size(); i++) {
-				el.addElement((Exp) ctx.expression(i).accept(this));
-			}
-
-			return new Call(exp, id, el);
-		}
+		if (childAmount >= 5 && ctx.getChild(1).getText().equals(".")) {
+			Object exp = ctx.expression(0).accept(this);
+            Identifier id = (Identifier) ctx.identifier().accept(this);
+ 
+            ExpList el = new ExpList();
+            for (int i = 1; i < ctx.expression().size(); i++) {
+            	Object aux = ctx.expression(i).accept(this);
+            	if(aux instanceof Exp) el.addElement((Exp) aux);
+            	else {
+            		IdentifierExp ie = new IdentifierExp(ctx.expression(i).getText());
+            		el.addElement(ie);
+            	}
+            }
+            if(exp instanceof Exp) {
+                Exp aux = (Exp)exp;
+                return new Call(aux, id, el);
+            } else {
+                IdentifierExp ie = new IdentifierExp(ctx.expression(0).getText());
+                return new Call(ie, id, el);
+            }
+        }
 
 		if (expAmount == 2) {
-			Exp exp1 = (Exp) ctx.expression(0).accept(this);
-			Exp exp2 = (Exp) ctx.expression(1).accept(this);
-
+			Object aux1 = ctx.expression(0).accept(this);
+			Object aux2 = ctx.expression(1).accept(this);
+			Exp exp1, exp2;
+			if(aux1 instanceof Exp) {
+				exp1 = (Exp) aux1;
+			} else {
+				exp1 = new IdentifierExp(ctx.expression(0).getText());
+			}
+			if(aux2 instanceof Exp) {
+				exp2 = (Exp) aux2;
+			} else {
+				exp2 = new IdentifierExp(ctx.expression(1).getText());
+			}
 			String op = ctx.getChild(1).getText();
 
 			if (childAmount == 3) {
@@ -257,16 +317,22 @@ public class MiniJavaASTVisitor implements MiniJavaVisitor<Object> {
 				return new ArrayLookup(exp1, exp2);
 			}
 		} else if (expAmount == 1) {
-			Exp exp = (Exp) ctx.expression(0).accept(this);
-
+			Object exp = ctx.expression(0).accept(this);
+			Exp aux;
+			if(exp instanceof Exp) {
+                aux = (Exp)exp;
+            } else {
+                aux = new IdentifierExp(ctx.expression(0).getText());
+            }
+			
 			if (start.equals("!")) {
-				return new Not(exp);
+				return new Not(aux);
 			} else if (start.equals("(")) {
-				return (Exp) ctx.expression(0).accept(this);
+				return aux;
 			} else if (start.equals("new")) {
-				return new NewArray(exp);
+				return new NewArray(aux);
 			} else {
-				return new ArrayLength(exp);
+				return new ArrayLength(aux);
 			}
 		} else if (start.equals("new")) {
 			return new NewObject((Identifier) ctx.identifier().accept(this));

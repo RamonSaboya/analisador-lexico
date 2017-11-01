@@ -2,18 +2,15 @@ package br.ufpe.cin.if688.minijava.ast;
 
 import br.ufpe.cin.if688.minijava.visitor.IVisitor;
 
-public class Identifier {
-	public String s;
+public class IntegerLiteral extends Exp {
+	public int i;
 
-	public Identifier(String as) {
-		s = as;
+	public IntegerLiteral(int ai) {
+		i = ai;
 	}
 
+	@Override
 	public <T> T accept(IVisitor<T> visitor) {
 		return visitor.visit(this);
-	}
-
-	public String toString() {
-		return s;
 	}
 }
