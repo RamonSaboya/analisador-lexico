@@ -31,8 +31,8 @@ public class Main {
 	public void test1() throws IOException {
 		Program prog = (Program) new MiniJavaASTVisitor().visit(fromFile("BinarySearch.java").goal());
 
-		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
-		ppv.visit(prog);
+		//PrettyPrintVisitor ppv = new PrettyPrintVisitor();
+		//ppv.visit(prog);
 		
 		BuildSymbolTableVisitor symbolTable = new BuildSymbolTableVisitor();
 		prog.accept(symbolTable);
@@ -40,52 +40,82 @@ public class Main {
 		prog.accept(typeCheck);
 	}
 
-	/*@Test
+	@Test
 	public void test2() throws IOException {
 		Program prog = (Program) new MiniJavaASTVisitor().visit(fromFile("BinaryTree.java").goal());
 
-		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
-		ppv.visit(prog);
+		//PrettyPrintVisitor ppv = new PrettyPrintVisitor();
+		//ppv.visit(prog);
+				
+		BuildSymbolTableVisitor symbolTable = new BuildSymbolTableVisitor();
+		prog.accept(symbolTable);
+		TypeCheckVisitor typeCheck = new TypeCheckVisitor(symbolTable.getSymbolTable());
+		prog.accept(typeCheck);
 	}
 
 	@Test
 	public void test3() throws IOException {
 		Program prog = (Program) new MiniJavaASTVisitor().visit(fromFile("BubbleSort.java").goal());
 
-		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
-		ppv.visit(prog);
+		//PrettyPrintVisitor ppv = new PrettyPrintVisitor();
+		//ppv.visit(prog);
+				
+		BuildSymbolTableVisitor symbolTable = new BuildSymbolTableVisitor();
+		prog.accept(symbolTable);
+		TypeCheckVisitor typeCheck = new TypeCheckVisitor(symbolTable.getSymbolTable());
+		prog.accept(typeCheck);
 	}
 
 	@Test
 	public void test4() throws IOException {
 		Program prog = (Program) new MiniJavaASTVisitor().visit(fromFile("LinearSearch.java").goal());
 
-		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
-		ppv.visit(prog);
+		//PrettyPrintVisitor ppv = new PrettyPrintVisitor();
+		//ppv.visit(prog);
+				
+		BuildSymbolTableVisitor symbolTable = new BuildSymbolTableVisitor();
+		prog.accept(symbolTable);
+		TypeCheckVisitor typeCheck = new TypeCheckVisitor(symbolTable.getSymbolTable());
+		prog.accept(typeCheck);
 	}
 
 	@Test
 	public void test5() throws IOException {
 		Program prog = (Program) new MiniJavaASTVisitor().visit(fromFile("LinkedList.java").goal());
 
-		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
-		ppv.visit(prog);
+		//PrettyPrintVisitor ppv = new PrettyPrintVisitor();
+		//ppv.visit(prog);
+				
+		BuildSymbolTableVisitor symbolTable = new BuildSymbolTableVisitor();
+		prog.accept(symbolTable);
+		TypeCheckVisitor typeCheck = new TypeCheckVisitor(symbolTable.getSymbolTable());
+		prog.accept(typeCheck);
 	}
 
 	@Test
 	public void test6() throws IOException {
 		Program prog = (Program) new MiniJavaASTVisitor().visit(fromFile("QuickSort.java").goal());
 
-		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
-		ppv.visit(prog);
+		//PrettyPrintVisitor ppv = new PrettyPrintVisitor();
+		//ppv.visit(prog);
+				
+		BuildSymbolTableVisitor symbolTable = new BuildSymbolTableVisitor();
+		prog.accept(symbolTable);
+		TypeCheckVisitor typeCheck = new TypeCheckVisitor(symbolTable.getSymbolTable());
+		prog.accept(typeCheck);
 	}
 
 	@Test
 	public void test7() throws IOException {
 		Program prog = (Program) new MiniJavaASTVisitor().visit(fromFile("Simple.java").goal());
 
-		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
-		ppv.visit(prog);
-	}*/
+		//PrettyPrintVisitor ppv = new PrettyPrintVisitor();
+		//ppv.visit(prog);
+				
+		BuildSymbolTableVisitor symbolTable = new BuildSymbolTableVisitor();
+		prog.accept(symbolTable);
+		TypeCheckVisitor typeCheck = new TypeCheckVisitor(symbolTable.getSymbolTable());
+		prog.accept(typeCheck);
+	}
 
 }
