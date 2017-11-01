@@ -253,7 +253,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 			System.out.println("Bad operand types " + this.getTypeName(expression1) + " and " + this.getTypeName(expression2) +
 					" for binary operator 'And(&&)'. Expected BooleanType and BooleanType expressions.");
 		}
-		return null;
+		return new BooleanType();
 	}
 
 	// Exp e1,e2;
