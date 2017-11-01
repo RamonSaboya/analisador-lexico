@@ -46,6 +46,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 	private Class currClass;
 	private Class currParent;
 	private Method currMethod;
+	private boolean fromVariable;
 	
 	
 	public TypeCheckVisitor(SymbolTable st) {
@@ -53,6 +54,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 		this.currClass = null;
 		this.currParent = null;
 		this.currMethod = null;
+		this.fromVariable = false;
 	}
 
 	// MainClass m;
@@ -117,8 +119,10 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 	// Type t;
 	// Identifier i;
 	public Type visit(VarDecl n) {
+		this.fromVariable = true;
 		Type type = n.t.accept(this);
 		n.i.accept(this);
+		this.fromVariable = false;
 		return type;
 	}
 
@@ -153,8 +157,10 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 	// Type t;
 	// Identifier i;
 	public Type visit(Formal n) {
+		this.fromVariable = true;
 		Type type = n.t.accept(this);
 		n.i.accept(this);
+		this.fromVariable = false;
 		return type;
 	}
 
@@ -218,7 +224,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 	// Identifier i;
 	// Exp e;
 	public Type visit(Assign n) {
-		Type identifier = this.symbolTable.getVarType(this.currMethod, this.currClass, n.toString());
+		Type identifier = this.symbolTable.getVarType(this.currMethod, this.currClass, n.i.toString());
 		n.i.accept(this);
 		Type expression = n.e.accept(this);
 		if(!this.symbolTable.compareTypes(identifier,expression)) {
@@ -230,7 +236,9 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 	// Identifier i;
 	// Exp e1,e2;
 	public Type visit(ArrayAssign n) {
+		this.fromVariable = true;
 		Type array = n.i.accept(this);
+		this.fromVariable = false;
 		Type index = n.e1.accept(this);
 		Type expression = n.e2.accept(this);
 		if(!(array instanceof IntArrayType)) {
@@ -253,7 +261,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 			System.out.println("Bad operand types " + this.getTypeName(expression1) + " and " + this.getTypeName(expression2) +
 					" for binary operator 'And(&&)'. Expected BooleanType and BooleanType expressions.");
 		}
-		return null;
+		return new BooleanType();
 	}
 
 	// Exp e1,e2;
@@ -329,11 +337,11 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 		Type classType = n.e.accept(this);
 		Type type = null;
 		if(classType instanceof IdentifierType) {
-			Class classCall = this.symbolTable.getClass(((IdentifierType) classType).s);
-			Method methodCall = this.symbolTable.getMethod(n.i.toString(), classCall.getId());
+			Method methodCall = this.symbolTable.getMethod(n.i.toString(), ((IdentifierType) classType).s);
 			if(methodCall == null) {
 				System.out.println("Cannot find symbol " + n.i.toString());
 			} else {
+				n.i.accept(this);
 				type = methodCall.type();
 				for (int i = 0; i < n.el.size(); i++) {
 					if(!this.symbolTable.compareTypes(n.el.elementAt(i).accept(this),methodCall.getParamAt(i).type())) {
@@ -364,7 +372,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 
 	// String s;
 	public Type visit(IdentifierExp n) {
-		Type identifierExp = this.symbolTable.getVarType(this.currMethod, this.currClass, n.toString());
+		Type identifierExp = this.symbolTable.getVarType(this.currMethod, this.currClass, n.s);
 		if(identifierExp == null) {
 			System.out.println("Cannot find symbol "+n.s);
 		}
@@ -387,7 +395,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 	// Identifier i;
 	public Type visit(NewObject n) {
 		n.i.accept(this);
-		return this.symbolTable.getClass(n.toString()).type();
+		return this.symbolTable.getClass(n.i.toString()).type();
 	}
 
 	// Exp e;
@@ -401,13 +409,15 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 
 	// String s;
 	public Type visit(Identifier n) {
-		boolean c = this.currClass != null && this.currClass.getId().equals(n.toString());
-		boolean p = this.currParent != null && this.currParent.getId().equals(n.toString());
-		boolean m = this.currMethod != null && this.currMethod.getId().equals(n.toString());
-		if(!(c||p||m)) {
+		if(this.fromVariable) {
 			Type identifier = this.symbolTable.getVarType(this.currMethod, this.currClass, n.toString());
 			if(identifier == null) {
 				System.out.println("Cannot find symbol " + n.toString() + ".");
+			}
+			return identifier;
+		} else {
+			if(this.symbolTable.containsClass(n.toString())) {
+				return this.symbolTable.getClass(n.toString()).type();
 			}
 		}
 		return new IdentifierType(n.toString());
