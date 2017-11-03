@@ -41,19 +41,27 @@ import br.ufpe.cin.if688.minijava.symboltable.SymbolTable;
 
 public class BuildSymbolTableVisitor implements IVisitor<Void> {
 
-	SymbolTable symbolTable;
+	private SymbolTable symbolTable;
+
+	private Class currClass;
+	private Method currMethod;
+	private boolean fromMethod = false;
+
+	private StringBuilder errors;
 
 	public BuildSymbolTableVisitor() {
-		symbolTable = new SymbolTable();
+		this.symbolTable = new SymbolTable();
+
+		this.errors = new StringBuilder();
 	}
 
 	public SymbolTable getSymbolTable() {
 		return symbolTable;
 	}
 
-	private Class currClass;
-	private Method currMethod;
-	private boolean fromMethod = false;
+	public StringBuilder getErrors() {
+		return this.errors;
+	}
 
 	// MainClass m;
 	// ClassDeclList cl;
@@ -72,8 +80,8 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 		this.currClass = this.symbolTable.getClass(n.i1.toString());
 		this.currClass.addMethod("main", null);
 		Type t = new IntegerType();
-		this.currClass.getMethod("main").addParam(n.i2.toString(), t);	
-		//this.currClass.addVar(n.i2.toString(),t);
+		this.currClass.getMethod("main").addParam(n.i2.toString(), t);
+		// this.currClass.addVar(n.i2.toString(),t);
 		n.i1.accept(this);
 		n.i2.accept(this);
 		n.s.accept(this);
@@ -84,7 +92,7 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 	// VarDeclList vl;
 	// MethodDeclList ml;
 	public Void visit(ClassDeclSimple n) {
-		if(this.symbolTable.addClass(n.i.toString(), null)) {
+		if (this.symbolTable.addClass(n.i.toString(), null)) {
 			this.currClass = this.symbolTable.getClass(n.i.toString());
 			n.i.accept(this);
 			for (int i = 0; i < n.vl.size(); i++) {
@@ -94,7 +102,7 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 				n.ml.elementAt(i).accept(this);
 			}
 		} else {
-			System.out.println("Class " + n.i.toString() + " is already defined in program.");
+			this.errors.append("Class " + n.i.toString() + " is already defined in program.").append(System.lineSeparator());
 		}
 		return null;
 	}
@@ -104,7 +112,7 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 	// VarDeclList vl;
 	// MethodDeclList ml;
 	public Void visit(ClassDeclExtends n) {
-		if(this.symbolTable.addClass(n.i.toString(), n.j.toString())) {
+		if (this.symbolTable.addClass(n.i.toString(), n.j.toString())) {
 			this.currClass = this.symbolTable.getClass(n.i.toString());
 			n.i.accept(this);
 			n.j.accept(this);
@@ -115,7 +123,7 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 				n.ml.elementAt(i).accept(this);
 			}
 		} else {
-			System.out.println("Class " + n.i.toString() + " is already defined in program.");
+			this.errors.append("Class " + n.i.toString() + " is already defined in program.").append(System.lineSeparator());
 		}
 		return null;
 	}
@@ -125,12 +133,12 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 	public Void visit(VarDecl n) {
 		n.t.accept(this);
 		n.i.accept(this);
-		if(this.fromMethod) {
-			if(!this.currMethod.addVar(n.i.toString(), n.t)) {
-				System.out.println("Variable " + n.i.toString() + " is already defined in method " + this.currMethod.getId()+".");
+		if (this.fromMethod) {
+			if (!this.currMethod.addVar(n.i.toString(), n.t)) {
+				this.errors.append("Variable " + n.i.toString() + " is already defined in method " + this.currMethod.getId() + ".").append(System.lineSeparator());
 			}
-		} else if(!this.currClass.addVar(n.i.toString(), n.t)) {
-			System.out.println("Variable " + n.i.toString() + " is already defined in class " + this.currClass.getId()+".");
+		} else if (!this.currClass.addVar(n.i.toString(), n.t)) {
+			this.errors.append("Variable " + n.i.toString() + " is already defined in class " + this.currClass.getId() + ".").append(System.lineSeparator());
 		}
 		return null;
 	}
@@ -143,7 +151,7 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 	// Exp e;
 	public Void visit(MethodDecl n) {
 		this.fromMethod = true;
-		if(this.currClass.addMethod(n.i.toString(), n.t)) {
+		if (this.currClass.addMethod(n.i.toString(), n.t)) {
 			this.currMethod = this.currClass.getMethod(n.i.toString());
 			n.t.accept(this);
 			n.i.accept(this);
@@ -158,7 +166,7 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 			}
 			n.e.accept(this);
 		} else {
-			System.out.println("Method " + n.i.toString() + " is already defined in class " + this.currClass.getId() + ".");
+			this.errors.append("Method " + n.i.toString() + " is already defined in class " + this.currClass.getId() + ".").append(System.lineSeparator());
 		}
 		this.fromMethod = false;
 		return null;
@@ -169,8 +177,8 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 	public Void visit(Formal n) {
 		n.t.accept(this);
 		n.i.accept(this);
-		if(!this.currMethod.addParam(n.i.toString(),n.t)) {
-			System.out.println("Variable " + n.i.toString() + " is already defined in method " + this.currMethod.getId()+".");
+		if (!this.currMethod.addParam(n.i.toString(), n.t)) {
+			this.errors.append("Variable " + n.i.toString() + " is already defined in method " + this.currMethod.getId() + ".").append(System.lineSeparator());
 		}
 		return null;
 	}
