@@ -155,7 +155,6 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 		if (!this.symbolTable.compareTypes(expected, actual)) {
 			this.errors.append("Incompatible types: " + this.getTypeName(actual) + " cannot be converted to " + this.getTypeName(expected) + ". (METHOD RETURN)")
 					.append(System.lineSeparator());
-			System.exit(1);
 		}
 		Type method = this.currMethod.type();
 		this.currMethod = null;
@@ -352,29 +351,33 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 		Type type = null;
 		if (classType instanceof IdentifierType) {
 			Class classCall = this.symbolTable.getClass(((IdentifierType) classType).s);
-			Method methodCall = this.symbolTable.getMethod(n.i.toString(), ((IdentifierType) classType).s);
-			if (methodCall == null) {
-				this.errors.append("Cannot find symbol " + n.i.toString() + ". (METHOD)").append(System.lineSeparator());
+			if(classCall == null) {
+				this.errors.append("Cannot find symbol " + ((IdentifierType) classType).s + ". (CLASS)").append(System.lineSeparator());
 			} else {
-				this.fromMethod = true;
-				Class previousClass = this.currClass;
-				this.currClass = classCall;
-				n.i.accept(this);
-				this.currClass = previousClass;
-				this.fromMethod = false;
-				type = methodCall.type();
-				if (this.sameNumberArgs(methodCall.getParams(), n.el.size())) {
-					for (int i = 0; i < n.el.size(); i++) {
-						if (!this.symbolTable.compareTypes(n.el.elementAt(i).accept(this), methodCall.getParamAt(i).type())) {
-							this.errors.append("Incompatible types: " + this.getTypeName(n.el.elementAt(i).accept(this)) + " cannot be converted to "
-									+ this.getTypeName(methodCall.getParamAt(i).type()) + ". Some messages may been simplified in method " + methodCall.getId()
-									+ ". (METHOD ARGS)").append(System.lineSeparator());
-							i = n.el.size();
-						}
-					}
+				Method methodCall = this.symbolTable.getMethod(n.i.toString(), ((IdentifierType) classType).s);
+				if (methodCall == null) {
+					this.errors.append("Cannot find symbol " + n.i.toString() + ". (METHOD)").append(System.lineSeparator());
 				} else {
-					this.errors.append("Method " + methodCall.getId() + " in class " + classCall.getId() + " cannot be applied to given types. "
-							+ "Actual and formal argument lists differ in length.").append(System.lineSeparator());
+					this.fromMethod = true;
+					Class previousClass = this.currClass;
+					this.currClass = classCall;
+					n.i.accept(this);
+					this.currClass = previousClass;
+					this.fromMethod = false;
+					type = methodCall.type();
+					if (this.sameNumberArgs(methodCall.getParams(), n.el.size())) {
+						for (int i = 0; i < n.el.size(); i++) {
+							if (!this.symbolTable.compareTypes(n.el.elementAt(i).accept(this), methodCall.getParamAt(i).type())) {
+								this.errors.append("Incompatible types: " + this.getTypeName(n.el.elementAt(i).accept(this)) + " cannot be converted to "
+										+ this.getTypeName(methodCall.getParamAt(i).type()) + ". Some messages may been simplified in method " + methodCall.getId()
+										+ ". (METHOD ARGS)").append(System.lineSeparator());
+								i = n.el.size();
+							}
+						}
+					} else {
+						this.errors.append("Method " + methodCall.getId() + " in class " + classCall.getId() + " cannot be applied to given types. "
+								+ "Actual and formal argument lists differ in length.").append(System.lineSeparator());
+					}
 				}
 			}
 		} else {
@@ -444,8 +447,8 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 			}
 			return identifier;
 		} else if (this.fromMethod) {
-			if (this.currClass.containsMethod(n.toString())) {
-				return this.currClass.getMethod(n.toString()).type();
+			if (this.symbolTable.getMethod(n.toString(), this.currClass.getId()) != null) {
+				return this.symbolTable.getMethod(n.toString(), this.currClass.getId()).type();
 			} else {
 				this.errors.append("Cannot find symbol " + n.toString() + ". (METHOD)").append(System.lineSeparator());
 			}
@@ -453,7 +456,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 			if (this.symbolTable.containsClass(n.toString())) {
 				return this.symbolTable.getClass(n.toString()).type();
 			} else {
-
+				
 				this.errors.append("Cannot find symbol " + n.toString() + ". (CLASS)").append(System.lineSeparator());
 			}
 		}
