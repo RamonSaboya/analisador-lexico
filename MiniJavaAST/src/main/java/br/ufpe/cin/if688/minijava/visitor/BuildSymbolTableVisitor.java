@@ -45,6 +45,8 @@ import br.ufpe.cin.if688.minijava.symboltable.SymbolTable;
 
 public class BuildSymbolTableVisitor implements IVisitor<Void> {
 
+	private static final boolean PRINT_ERRORS = true;
+
 	private SymbolTable symbolTable;
 
 	private Class currClass;
@@ -70,7 +72,15 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 	// Gambiarra para tratar exeções,
 	// visto que não é possível alterar a implementação da AST do professor
 	private void appendError(String message) {
-		this.errors.append(message).append(System.lineSeparator());
+		if (PRINT_ERRORS) {
+			System.err.println(message);
+		} else {
+			if (this.errors.length() > 0) {
+				this.errors.append(System.lineSeparator());
+			}
+
+			this.errors.append(message);
+		}
 	}
 
 	// MainClass m;
