@@ -36,6 +36,7 @@ import br.ufpe.cin.if688.minijava.ast.VarDecl;
 import br.ufpe.cin.if688.minijava.ast.While;
 
 public interface IVisitor<T> {
+
 	public T visit(Program n);
 
 	public T visit(MainClass n);

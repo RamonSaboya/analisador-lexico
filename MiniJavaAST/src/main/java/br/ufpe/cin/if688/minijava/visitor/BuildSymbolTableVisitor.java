@@ -35,6 +35,10 @@ import br.ufpe.cin.if688.minijava.ast.True;
 import br.ufpe.cin.if688.minijava.ast.Type;
 import br.ufpe.cin.if688.minijava.ast.VarDecl;
 import br.ufpe.cin.if688.minijava.ast.While;
+import br.ufpe.cin.if688.minijava.exceptions.symboltable.ClassAlreadyDefinedException;
+import br.ufpe.cin.if688.minijava.exceptions.symboltable.ClassMethodAlreadyDefinedException;
+import br.ufpe.cin.if688.minijava.exceptions.symboltable.ClassVariableAlreadyDefinedException;
+import br.ufpe.cin.if688.minijava.exceptions.symboltable.MethodVariableAlreadyDefinedException;
 import br.ufpe.cin.if688.minijava.symboltable.Class;
 import br.ufpe.cin.if688.minijava.symboltable.Method;
 import br.ufpe.cin.if688.minijava.symboltable.SymbolTable;
@@ -63,6 +67,12 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 		return this.errors;
 	}
 
+	// Gambiarra para tratar exeções,
+	// visto que não é possível alterar a implementação da AST do professor
+	private void appendError(String message) {
+		this.errors.append(message).append(System.lineSeparator());
+	}
+
 	// MainClass m;
 	// ClassDeclList cl;
 	public Void visit(Program n) {
@@ -81,7 +91,6 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 		this.currClass.addMethod("main", null);
 		Type t = new IntegerType();
 		this.currClass.getMethod("main").addParam(n.i2.toString(), t);
-		// this.currClass.addVar(n.i2.toString(),t);
 		n.i1.accept(this);
 		n.i2.accept(this);
 		n.s.accept(this);
@@ -102,7 +111,11 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 				n.ml.elementAt(i).accept(this);
 			}
 		} else {
-			this.errors.append("Class " + n.i.toString() + " is already defined in program.").append(System.lineSeparator());
+			try {
+				throw new ClassAlreadyDefinedException(n.i.toString());
+			} catch (Exception e) {
+				this.appendError(e.getMessage());
+			}
 		}
 		return null;
 	}
@@ -123,7 +136,11 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 				n.ml.elementAt(i).accept(this);
 			}
 		} else {
-			this.errors.append("Class " + n.i.toString() + " is already defined in program.").append(System.lineSeparator());
+			try {
+				throw new ClassAlreadyDefinedException(n.i.toString());
+			} catch (Exception e) {
+				this.appendError(e.getMessage());
+			}
 		}
 		return null;
 	}
@@ -135,10 +152,18 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 		n.i.accept(this);
 		if (this.fromMethod) {
 			if (!this.currMethod.addVar(n.i.toString(), n.t)) {
-				this.errors.append("Variable " + n.i.toString() + " is already defined in method " + this.currMethod.getId() + ".").append(System.lineSeparator());
+				try {
+					throw new MethodVariableAlreadyDefinedException(this.currMethod.getId(), n.i.toString());
+				} catch (Exception e) {
+					this.appendError(e.getMessage());
+				}
 			}
 		} else if (!this.currClass.addVar(n.i.toString(), n.t)) {
-			this.errors.append("Variable " + n.i.toString() + " is already defined in class " + this.currClass.getId() + ".").append(System.lineSeparator());
+			try {
+				throw new ClassVariableAlreadyDefinedException(this.currClass.getId(), n.i.toString());
+			} catch (Exception e) {
+				this.appendError(e.getMessage());
+			}
 		}
 		return null;
 	}
@@ -166,7 +191,11 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 			}
 			n.e.accept(this);
 		} else {
-			this.errors.append("Method " + n.i.toString() + " is already defined in class " + this.currClass.getId() + ".").append(System.lineSeparator());
+			try {
+				throw new ClassMethodAlreadyDefinedException(this.currClass.getId(), n.i.toString());
+			} catch (Exception e) {
+				this.appendError(e.getMessage());
+			}
 		}
 		this.fromMethod = false;
 		return null;
@@ -178,7 +207,11 @@ public class BuildSymbolTableVisitor implements IVisitor<Void> {
 		n.t.accept(this);
 		n.i.accept(this);
 		if (!this.currMethod.addParam(n.i.toString(), n.t)) {
-			this.errors.append("Variable " + n.i.toString() + " is already defined in method " + this.currMethod.getId() + ".").append(System.lineSeparator());
+			try {
+				throw new MethodVariableAlreadyDefinedException(this.currMethod.getId(), n.i.toString());
+			} catch (Exception e) {
+				this.appendError(e.getMessage());
+			}
 		}
 		return null;
 	}
